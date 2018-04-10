@@ -1,0 +1,191 @@
+#include<stdio.h>
+#include<windows.h>
+int clock=0;
+void Queue2_Processing(int B2[],int Proc2[],int p);
+void sortarrival(int Arr1[],int B1[],int P1[],int Proc1[],int n)
+{
+	int temp,p=0;
+	for(int i=1;i<n-1;i++)
+	{
+		for(int j=1;j<n-p-1;j++)
+		{
+			if(Arr1[j]>Arr1[j+1])
+			{
+				temp=Arr1[j];
+				Arr1[j]=Arr1[j+1];
+				Arr1[j+1]=temp;
+				temp=B1[j];
+				B1[j]=B1[j+1];
+				B1[j+1]=temp;
+				temp=P1[j];
+				P1[j]=P1[j+1];
+				P1[j+1]=temp;
+				temp=Proc1[j];
+				Proc1[j]=Proc1[j+1];
+				Proc1[j+1]=temp;
+			}
+		}p++;
+	}
+	printf("Process       Burst Time      Arrival Time        Priority\n");
+	for(int i=1;i<n;i++)
+	{
+		printf("P%d               %d                   %d                 %d\n",Proc1[i],B1[i],Arr1[i],P1[i]);
+	}
+}
+
+int Queue1_Processing(int B1[],int Arr1[],int P1[],int Proc1[],int n,int B2[],int Proc2[])
+{
+	printf("The first process to start executing is process P%d at time %d\n",Proc1[1],Arr1[1]);
+	int currclock=Arr1[1];
+	int clock=Arr1[1];
+	int currprocess=1,p=1,i=2;
+	while(1)
+	{
+			if((clock>=Arr1[i])&&(i<n))
+			{
+				if((P1[currprocess]>P1[i])&&(B1[currprocess]>0))
+				{
+					printf("The current running process P%d will preempt and the new process P%d will start to execute\n",currprocess,Proc1[i]);
+					B2[p]=B1[currprocess];
+					Proc2[p]=Proc1[currprocess];
+					currprocess=i;
+					currclock=0;
+					p++;
+				}
+				else if((P1[currprocess]>P1[i])&&(B1[currprocess]<=0))
+				{
+					printf("The process P%d will start to execute\n",Proc1[i]);
+					currclock=0;
+					currprocess=i;
+				}
+				else if((P1[currprocess]<P1[i])&&(B1[currprocess]<=0))
+				{
+					printf("The process P%d will start to execute\n",Proc1[i]);
+					currclock=0;
+					currprocess=i;
+				}
+				else if((P1[currprocess]<P1[i])&&(B1[currprocess]>0))
+				{
+					printf("The process P%d has come into memory but its priority is less than the currently running prcoess therefore it will move to queue2\n",Proc1[i]);
+					B2[p]=B1[i];
+					Proc2[p]=Proc1[i];
+					p++;
+				}
+				i++;
+			}
+			else if((B1[currprocess]<=0)&&(i>=n))
+			{
+				break;
+			}
+			else if(B1[currprocess]<=0)
+			{
+				printf("Process P%d is now over and CPU is idle",Proc1[currprocess]);
+				clock++;
+				Sleep(1000);
+				printf("Value of clock is %d\n",clock);
+			}
+			else
+			{
+				clock++;
+				currclock++;
+				Sleep(1000);
+				printf("Value of clock is %d\n",clock);
+				if(B1[currprocess]>0)
+				B1[currprocess]--;
+			}
+		}
+	return p;
+}
+int main()
+{
+	printf("              Welcome");
+	Sleep(2000);
+	printf("\nEnter the number of processes\n");
+	int n;
+	scanf("%d",&n);
+	n++;
+	int Arr1[n],B1[n],Proc1[n],P1[n];
+	int B2[n],Proc2[n];
+	printf("Enter the burst time, arrival time and the priority of each process \n");
+	for(int i=1;i<n;i++)
+	{
+		printf("Enter detail of P%d process\n",i);
+		printf("Enter Burst time :");
+		scanf("%d",&B1[i]);
+		printf("Enter arrival time :");
+		scanf("%d",&Arr1[i]);
+		printf("Enter priority :");
+		scanf("%d",&P1[i]);
+		Proc1[i]=i;
+	}
+	printf("\nThe table you have entered is as follows\n");
+	printf("Process       Burst Time      Arrival Time        Priority\n");
+	for(int i=1;i<n;i++)
+	{
+		printf("P%d               %d                   %d                 %d\n",i,B1[i],Arr1[i],P1[i]);
+	}
+	sortarrival(Arr1,B1,P1,Proc1,n);
+	int p=Queue1_Processing(B1,Arr1,P1,Proc1,n,B2,Proc2);
+	Queue2_Processing(B2,Proc2,p);
+}
+		
+	
+		
+void Queue2_Processing(int B2[],int Proc2[],int p)
+{
+	int tm,x,flag=0,count=0;
+	while(1)
+	{
+		printf("Enter the time quantum for Queue  2: ");
+		scanf("%d",&tm);
+		if(tm%2==0)
+		{
+			break;
+		}
+		else
+		{
+			printf("Invlaid Time quantum!!\n");
+			printf("Please re-enter\n");
+		}	
+	}
+	int i=1;	
+	while(flag!=1)
+	{
+		int w=1;
+		for(x=0;x<tm;x++)
+		{
+			
+			if(B2[w]==0)
+			break;
+			printf("Process %d is running\n",Proc2[w]);
+			B2[w]--;
+				
+		}
+		
+		if(B2[w]!=0)
+		printf("\n\nNow Process %d is going at the end of queue as it has executed for given %d time quantam\n\n\n",Proc2[w],tm);
+		else if(Proc2[w]!=0)
+		printf("\nProcess %d is completed\n\n\n",Proc2[w]);
+		int a=B2[w];
+		int b=Proc2[w];
+		for(x=1;x<=p-1;x++)
+		{
+			B2[x]=B2[x+1];
+			Proc2[x]=Proc2[x+1];
+		}
+		if(a!=0)
+		{
+		B2[x]=a;
+		Proc2[x]=b;}
+		else
+		p--;
+	for(x=1;x<=p;x++)
+	{
+		if(B2[x]<=0)
+		count++;
+	}
+	if(count==p)
+	flag=1;
+	count=0;		
+	}
+}
